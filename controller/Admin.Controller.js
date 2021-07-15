@@ -1,4 +1,4 @@
-const ModelAdmin = require("../model/admin");
+const User = require("../model/admin");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const {
@@ -10,12 +10,12 @@ const { response } = require("express");
 exports.Admin = async (req, res) => {
   const { error } = validationResgister(req.body);
   if (error) return res.send(error.details[0].message);
-  const authAdmin = await ModelAdmin.findOne({ email: req.body.email });
+  const authAdmin = await User.findOne({ email: req.body.email });
   if (authAdmin) {
     return res.status(400).send({ message: "Email already exits !" });
   }
 
-  const _admin = new ModelAdmin({
+  const _admin = new User({
     ...req.body,
     role: "admin",
   });
@@ -33,7 +33,7 @@ exports.SigninAdmin = async (req, res) => {
   const { error } = validationLogin(req.body);
   if (error) return res.send(error.details[0].message);
 
-  const valiAdmin = await ModelAdmin.findOne({ email: req.body.email });
+  const valiAdmin = await User.findOne({ email: req.body.email });
   const { email, password, role } = valiAdmin;
 
   if (!valiAdmin) return res.status(400).send("Email is not found");
@@ -62,9 +62,8 @@ exports.auth = (req, res, next) => {
   const token = req.header("auth-token");
   if (!token) return res.status(401).send("Accesss Denied");
   try {
-    const user = new ModelAdmin();
     const verified = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = verified;
+    req._admin = verified;
     next();
   } catch (error) {
     res.status(401).send("Invalid Token");
