@@ -1,42 +1,43 @@
 const ModelAdmin = require("../model/admin");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const { validationResgister } = require("../validation/validation.account");
+
 exports.Admin = async (req, res) => {
   const body = req.body;
+  const { error } = validationResgister(req.body);
+  if (error) return res.send(error.details[0].message);
   const authAdmin = await ModelAdmin.findOne({ email: req.body.email });
   if (authAdmin) {
-    return res.status(400).send({ error: "Data not formatted properly" });
+    return res.status(400).send({ message: "Email already exits !" });
   }
-  const token = jwt.sign({ email: req.body.email }, process.env.JWT_SECRET, {
-    expiresIn: "7d",
+
+  const _admin = new ModelAdmin({
+    ...body,
+    role: "admin",
   });
-  const _admin = new ModelAdmin(body);
   const salt = await bcrypt.genSalt(10);
   _admin.password = await bcrypt.hash(_admin.password, salt);
-  _admin.save((error, data) => {
-    if (error) {
-      res.status(400).send({ message: error });
-    }
-    if (data) {
-      res.status(201).send({ data, accssesToken: token });
-    }
-  });
+  try {
+    const _saveAdmin = await _admin.save();
+    res.status(200).send(_saveAdmin);
+  } catch (error) {
+    res.status(400).send(error);
+  }
 };
 
 exports.SigninAdmin = async (req, res) => {
-  const body = req.body;
-  const authAdmin = await ModelAdmin.findOne({ email: req.body.email });
-  if (authAdmin) {
-    const validPassword = await bcrypt.compare(
-      body.password,
-      authAdmin.password
-    );
-    if (validPassword) {
-      res.status(200).send("SUCCESS LOGIN !");
-    } else {
-      res.status(400).send(" ERRORS");
-    }
-  } else {
-    res.status(400).send(" ERRORS");
-  }
+  console.log(req.body.role);
+  const valiAdmin = await ModelAdmi.findOne({ email: req.body.email });
+
+  if (!valiAdmin) return res.status(400).send("Email is not found");
+
+  const validPassword = await bcrypt.compare(body.password, authAdmin.password);
+
+  if (!validPassword) return res.status(400).send("Password is not found");
+
+  const token = jwt.sign({ email: req.body.email }, process.env.JWT_SECRET, {
+    expiresIn: "7d",
+  });
+  res.header("auth-token", token).send(req.body,token);
 };
