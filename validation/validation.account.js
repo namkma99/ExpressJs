@@ -2,6 +2,7 @@ const Joi = require("joi");
 
 exports.validationResgister = (data) => {
   const schema = Joi.object({
+    idx : Joi.string(),
     userName: Joi.string().min(6).max(30).required(),
 
     email: Joi.string().required().email(),
