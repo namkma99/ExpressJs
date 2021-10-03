@@ -1,4 +1,5 @@
+
 exports.UserSignin = (req, res) => {
-    res.send('Controller')
+    res.send('SUCCESSFULLY !')
 }
 

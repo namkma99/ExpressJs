@@ -1,4 +1,4 @@
- {
+{
   "name": "untitled",
   "version": "1.0.0",
   "description": "",
@@ -16,6 +16,7 @@
   },
   "devDependencies": {
     "bcrypt": "^5.0.1",
+    "joi": "^17.4.1",
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^5.13.2",
     "nodemon": "^2.0.12"
